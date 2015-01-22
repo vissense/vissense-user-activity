@@ -1,0 +1,38 @@
+{
+  "name": "vissense-user-activity",
+  "version": "0.0.0",
+  "license": "MIT",
+  "main": "dist/vissense.user-activity.min.js",
+  "description": "",
+  "keywords": [],
+  "homepage": "https://www.github.com/vissense/vissense-user-activity",
+  "authors": [
+    "tbk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/vissense/vissense-user-activity.git"
+  },
+  "ignore": [
+    "spec",
+    "bower_components",
+    "node_modules",
+    "Gruntfile.js",
+    "karma.conf.js",
+    "SpecRunner.html",
+    "package.json",
+    "bower.json",
+    "src/test",
+    "dist/coverage",
+    "**/.*"
+  ],
+  "devDependencies": {
+    "jasmine": "2.0.2",
+    "lodash": "2.4.1",
+    "jquery": "2.1.1",
+    "jasmine-jquery": "velesin/jasmine-jquery#2.0.5"
+  },
+  "dependencies": {
+    "vissense": "vissense/vissense#0.2.1"
+  }
+}
