@@ -34,14 +34,6 @@ module.exports = function (grunt) {
           'lib/vissense.user-activity.js'
         ],
         dest: '<%= dirs.tmp %>/vissense.user-activity.js'
-      },
-      dist: {
-        options: {
-          banner: '<%= banner %>',
-          stripBanners: true
-        },
-        src: '<%= concat.tmp.dest %>',
-        dest: '<%= dirs.dist %>/vissense.user-activity.js'
       }
     },
     umd: {
@@ -55,15 +47,29 @@ module.exports = function (grunt) {
       }
     },
     uglify: {
-      options: {
-        banner: '<%= banner %>',
-        report: 'gzip',
-        compress: {
-          drop_console: true
-        }
+      src: {
+        options: {
+          banner: '<%= banner %>',
+          compress: {
+            drop_console: true
+          },
+          sourceMap: false,
+          preserveComments: false,
+          beautify: true,
+          mangle: false
+        },
+        src: '<%= concat.tmp.dest %>',
+        dest: '<%= dirs.dist %>/vissense.user-activity.js'
       },
       dist: {
-        src: '<%= concat.dist.dest %>',
+        options: {
+          banner: '<%= banner %>',
+          report: 'gzip',
+          compress: {
+            drop_console: true
+          }
+        },
+        src: '<%= concat.tmp.dest %>',
         dest: '<%= dirs.dist %>/vissense.user-activity.min.js'
       }
     },
@@ -207,7 +213,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-notify');
   grunt.loadNpmTasks('grunt-umd');
 
-  grunt.registerTask('dist', ['jshint', 'clean:tmp', 'concat:tmp', 'umd', 'clean:dist', 'concat:dist', 'uglify', 'clean:tmp']);
+  grunt.registerTask('dist', ['jshint', 'clean:tmp', 'concat:tmp', 'umd', 'clean:dist', 'uglify', 'clean:tmp']);
   grunt.registerTask('test', ['jasmine', 'karma', 'notify:test']);
 
   grunt.registerTask('default', ['dist', 'test', 'micro', 'notify:js']);
