@@ -1,4 +1,4 @@
-/*! { "name": "vissense-user-activity", "version": "0.2.1", "copyright": "(c) 2015 tbk" } */;(function (root, factory) {
+/*! { "name": "vissense-user-activity", "version": "0.0.0", "copyright": "(c) 2015 tbk" } */;(function (root, factory) {
   'use strict';
   factory(root, root.VisSense);
 }(this, function (window, VisSense, undefined) {
