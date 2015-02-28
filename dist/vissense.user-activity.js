@@ -17,9 +17,9 @@
   var now = Utils.now;
 
   function fireListeners(listeners, context) {
-    for (var i = 0, n = listeners.length; i < n; i++) {
-      listeners[i].call(context || window);
-    }
+    Utils.forEach(listeners, function(listener) {
+      listener.call(context || window);
+    });
   }
 
   function UserActivity(config) {
@@ -61,14 +61,14 @@
         me._setActive(false);
         console.debug('User is considered inactive.');
       } else {
-        console.debug('Limit not reached: %i >= %i', lastActivityTime, me._config.inactiveAfter);
+        console.debug('Limit not reached:', lastActivityTime, '>=', me._config.inactiveAfter);
 
         me._clearTimeout();
 
         console.debug('Cancelled timeout and reschedule again.');
 
         me._clearTimeout = (function (callback, timeout) {
-          console.debug('Timeout is scheduled to run in %i ms.', timeout);
+          console.debug('Timeout is scheduled to run in', timeout, 'ms.');
           var timeoutId = setTimeout(callback, timeout);
           return function () {
             console.debug('Timeout cancelled.');
@@ -149,7 +149,7 @@
     return function () {
       var index = me._listeners.indexOf(listener);
 
-      console.debug('Removing listener on index %i', index);
+      console.debug('Removing listener on index', index);
 
       if (index > -1) {
         me._listeners.splice(index, 1);
