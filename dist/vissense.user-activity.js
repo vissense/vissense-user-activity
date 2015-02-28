@@ -13,14 +13,16 @@
         this._config = defaults(config, {
             inactiveAfter: 6e4,
             debounce: 100,
-            events: [ "resize", "scroll", "mousemove", "mousewheel", "keydown", "mousedown", "touchstart", "touchmove" ]
+            events: [ "resize", "scroll", "mousemove", "mousewheel", "keydown", "mousedown", "touchstart", "touchmove" ],
+            active: noop,
+            inactive: noop,
+            update: noop
         }), this._listeners = [], this._clearTimeout = noop, this._state = {
             active: !0,
-            changed: !1,
             lastActivityTime: now(),
             started: !1
         }, this._setActive = function(active) {
-            this._state.changed = this._state.active !== active, this._state.active = active;
+            this._state.active = active;
         };
         var me = this;
         this._updateState = function() {
@@ -36,17 +38,15 @@
             }, me._config.inactiveAfter)), fireListeners(me._listeners, me);
         }, this._onUserActivity = function() {
             me._state.lastActivityTime = now(), me._setActive(!0), me._updateState();
-        };
+        }, this.onUpdate(this._config.update), this.onActive(this._config.active), this.onInactive(this._config.inactive);
     }
     var Utils = VisSense.Utils, debounce = Utils.debounce, defaults = Utils.defaults, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
         var index = array.indexOf(element);
         return index > -1 ? (array.splice(index, 1), !0) : !1;
     };
     UserActivity.prototype.start = function() {
-        if (this._state.started) return this;
-        var me = this;
-        return this._removeEventListeners = function() {
-            var onUserActivity = debounce(me._onUserActivity, me._config.debounce), events = me._config.events;
+        return this._state.started ? this : (this._removeEventListeners = function(consumer, options) {
+            var onUserActivity = debounce(consumer, options.debounce), events = options.events;
             return Utils.forEach(events, function(event) {
                 addEventListener(event, onUserActivity, !1);
             }), function() {
@@ -54,7 +54,8 @@
                     removeEventListener(event, onUserActivity, !1);
                 });
             };
-        }(), this._state.started = !0, this._onUserActivity(), this;
+        }(this._onUserActivity, this._config), this._state.started = !0, this._onUserActivity(), 
+        this);
     }, UserActivity.prototype.stop = function() {
         return this._state.started ? (this._removeEventListeners(), this._clearTimeout(), 
         this._state.started = !1, this) : this;
@@ -69,12 +70,12 @@
     }, UserActivity.prototype.onActive = function(callback) {
         var me = this;
         return this.onUpdate(function() {
-            me._state.changed && me._state.active && callback(me);
+            me._state.active && callback(me);
         });
     }, UserActivity.prototype.onInactive = function(callback) {
         var me = this;
         return this.onUpdate(function() {
-            me._state.changed && !me._state.active && callback(me);
+            me._state.active || callback(me);
         });
     }, UserActivity.prototype.isActive = function() {
         return !this._state.started || this._state.active;

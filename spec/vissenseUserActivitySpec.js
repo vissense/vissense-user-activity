@@ -54,7 +54,7 @@ describe('VisSense.UserActivity', function () {
     expect(activityHelper.isActive()).toBe(true);
   });
 
-  it('should verify a reasonable default configuration values', function () {
+  it('should verify a reasonable default configuration', function () {
     var activityHelper = VisSense.UserActivity().start();
 
     expect(activityHelper.isActive()).toBe(true);
@@ -66,6 +66,38 @@ describe('VisSense.UserActivity', function () {
     activityHelper.stop();
 
     expect(activityHelper.isActive()).toBe(true);
+  });
+
+  it('should verify that events registered on creation time are triggered', function () {
+    var options = {
+      inactiveAfter: 1000,
+      debounce: 0,
+      update: function() {},
+      active: function() {},
+      inactive: function() {}
+    };
+
+    spyOn(options, 'active');
+    spyOn(options, 'inactive');
+    spyOn(options, 'update');
+
+
+    var activityHelper = VisSense.UserActivity(options).start();
+
+    expect(activityHelper.isActive()).toBe(true);
+    expect(options.update.calls.count()).toEqual(1);
+    expect(options.active.calls.count()).toEqual(1);
+    expect(options.inactive.calls.count()).toEqual(0);
+
+    jasmine.clock().tick(1001);
+
+    expect(activityHelper.isActive()).toBe(false);
+
+    expect(options.update.calls.count()).toEqual(2);
+    expect(options.active.calls.count()).toEqual(1);
+    expect(options.inactive.calls.count()).toEqual(1);
+
+    activityHelper.stop();
   });
 
   it('should verify that timer will be reset on User Activity events', function () {
