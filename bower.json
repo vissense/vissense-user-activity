@@ -17,6 +17,7 @@
     "spec",
     "bower_components",
     "node_modules",
+    "templates",
     "Gruntfile.js",
     "karma.conf.js",
     "SpecRunner.html",
