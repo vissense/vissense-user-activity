@@ -4,7 +4,7 @@
 }(this, function(window, VisSense, undefined) {
     "use strict";
     function fireListeners(listeners, context) {
-        Utils.forEach(listeners, function(listener) {
+        forEach(listeners, function(listener) {
             listener.call(context || window);
         });
     }
@@ -17,40 +17,34 @@
             active: noop,
             inactive: noop,
             update: noop
-        }), this._listeners = [], this._clearTimeout = noop, this._state = {
+        }), this._config.inactiveAfter -= 1, this._listeners = [], this._clearTimeout = noop, 
+        this._state = {
             active: !0,
             lastActivityTime: now(),
             started: !1
-        }, this._setActive = function(active) {
-            this._state.active = active;
         };
         var me = this;
         this._updateState = function() {
             var lastActivityTime = me.getTimeSinceLastActivity();
-            lastActivityTime >= me._config.inactiveAfter ? me._setActive(!1) : (me._clearTimeout(), 
-            me._clearTimeout = function(callback, timeout) {
-                var timeoutId = setTimeout(callback, timeout);
-                return function() {
-                    clearTimeout(timeoutId);
-                };
-            }(function() {
+            lastActivityTime >= me._config.inactiveAfter ? me._state.active = !1 : (me._clearTimeout(), 
+            me._clearTimeout = defer(function() {
                 me._updateState();
             }, me._config.inactiveAfter)), fireListeners(me._listeners, me);
         }, this._onUserActivity = function() {
-            me._state.lastActivityTime = now(), me._setActive(!0), me._updateState();
+            me._state.lastActivityTime = now(), me._state.active = !0, me._updateState();
         }, this.onUpdate(this._config.update), this.onActive(this._config.active), this.onInactive(this._config.inactive);
     }
-    var Utils = VisSense.Utils, debounce = Utils.debounce, defaults = Utils.defaults, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
+    var Utils = VisSense.Utils, debounce = Utils.debounce, defer = Utils.defer, defaults = Utils.defaults, forEach = Utils.forEach, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
         var index = array.indexOf(element);
         return index > -1 ? (array.splice(index, 1), !0) : !1;
     };
     UserActivity.prototype.start = function() {
         return this._state.started ? this : (this._removeEventListeners = function(consumer, options) {
             var onUserActivity = debounce(consumer, options.debounce), events = options.events;
-            return Utils.forEach(events, function(event) {
+            return forEach(events, function(event) {
                 addEventListener(event, onUserActivity, !1);
             }), function() {
-                Utils.forEach(events, function(event) {
+                forEach(events, function(event) {
                     removeEventListener(event, onUserActivity, !1);
                 });
             };
@@ -82,8 +76,10 @@
     }, UserActivity.prototype.getTimeSinceLastActivity = function() {
         return now() - this._state.lastActivityTime;
     }, VisSense.UserActivity = UserActivity, Strategy.UserActivityStrategy = function(config) {
-        this._userActivity = new UserActivity(config), this.visibilityHook = function() {
-            return this._userActivity.isActive();
+        this._userActivity = new UserActivity(config);
+        var me = this;
+        this.visibilityHook = function() {
+            return me._userActivity.isActive();
         };
     }, Strategy.UserActivityStrategy.prototype = Object.create(Strategy.prototype), 
     Strategy.UserActivityStrategy.prototype.init = function(monitor) {
@@ -92,10 +88,12 @@
             return hooks.push(self.visibilityHook), function() {
                 remove(hooks, self.visibilityHook);
             };
-        }(this);
+        }(this), this.removeOnUpdateListener = this._userActivity.onUpdate(function() {
+            monitor.update();
+        });
     }, Strategy.UserActivityStrategy.prototype.start = function() {
         this._userActivity.start();
     }, Strategy.UserActivityStrategy.prototype.stop = function() {
-        this.removeVisibilityHook(), this._userActivity.stop();
+        this.removeVisibilityHook(), this.removeOnUpdateListener(), this._userActivity.stop();
     };
 });
