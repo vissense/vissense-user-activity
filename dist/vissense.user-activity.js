@@ -59,7 +59,7 @@
         this._listeners.push(listener);
         var me = this;
         return function() {
-            return remove(me.listeners, listener);
+            return remove(me._listeners, listener);
         };
     }, UserActivity.prototype.onActive = function(callback) {
         var me = this;
