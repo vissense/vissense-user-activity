@@ -168,7 +168,7 @@ module.exports = function (grunt) {
     },
     micro: {
       options: {
-        limit: 1024
+        limit: 2048
       },
       dist: {
         src: '<%= uglify.dist.dest %>'

@@ -26,27 +26,27 @@
         var me = this;
         this._updateState = function() {
             var lastActivityTime = me.getTimeSinceLastActivity();
-            lastActivityTime >= me._config.inactiveAfter ? me._state.active = !1 : (me._clearTimeout(), 
-            me._clearTimeout = defer(function() {
+            VisibilityApi.isHidden() || lastActivityTime >= me._config.inactiveAfter ? me._state.active = !1 : (me._state.active = !0, 
+            me._clearTimeout(), me._clearTimeout = defer(function() {
                 me._updateState();
             }, me._config.inactiveAfter)), fireListeners(me._listeners, me);
         }, this._onUserActivity = function() {
-            me._state.lastActivityTime = now(), me._state.active = !0, me._updateState();
+            me._state.lastActivityTime = now(), me._updateState();
         }, this.onUpdate(this._config.update), this.onActive(this._config.active), this.onInactive(this._config.inactive);
     }
-    var Utils = VisSense.Utils, debounce = Utils.debounce, defer = Utils.defer, defaults = Utils.defaults, forEach = Utils.forEach, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
+    var Utils = VisSense.Utils, VisibilityApi = Utils.VisibilityApi, debounce = Utils.debounce, defer = Utils.defer, defaults = Utils.defaults, forEach = Utils.forEach, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
         var index = array.indexOf(element);
         return index > -1 ? (array.splice(index, 1), !0) : !1;
     };
     UserActivity.prototype.start = function() {
         return this._state.started ? this : (this._removeEventListeners = function(consumer, options) {
-            var onUserActivity = debounce(consumer, options.debounce), events = options.events;
+            var onUserActivity = debounce(consumer, options.debounce), removeOnVisibilityChange = VisibilityApi.onVisibilityChange(onUserActivity), events = options.events;
             return forEach(events, function(event) {
                 addEventListener(event, onUserActivity, !1);
             }), function() {
                 forEach(events, function(event) {
                     removeEventListener(event, onUserActivity, !1);
-                });
+                }), removeOnVisibilityChange();
             };
         }(this._onUserActivity, this._config), this._state.started = !0, this._onUserActivity(), 
         this);
