@@ -1,4 +1,4 @@
-/*! { "name": "vissense-user-activity", "version": "0.0.0", "copyright": "(c) 2015 tbk" } */!function(root, factory) {
+/*! { "name": "vissense-user-activity", "version": "0.1.0", "copyright": "(c) 2015 tbk" } */!function(root, factory) {
     "use strict";
     factory(root, root.VisSense);
 }(this, function(window, VisSense, undefined) {
@@ -17,8 +17,7 @@
             active: noop,
             inactive: noop,
             update: noop
-        }), this._config.inactiveAfter -= 1, this._listeners = [], this._clearTimeout = noop, 
-        this._state = {
+        }), this._listeners = [], this._clearTimeout = noop, this._state = {
             changed: !0,
             active: !1,
             lastActivityTime: now(),
