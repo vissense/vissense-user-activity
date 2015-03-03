@@ -72,9 +72,12 @@ describe('VisSense.UserActivity', function () {
     var options = {
       inactiveAfter: 1000,
       debounce: 0,
-      update: function() {},
-      active: function() {},
-      inactive: function() {}
+      update: function () {
+      },
+      active: function () {
+      },
+      inactive: function () {
+      }
     };
 
     spyOn(options, 'active');
@@ -103,9 +106,12 @@ describe('VisSense.UserActivity', function () {
     var options = {
       inactiveAfter: 1000,
       debounce: 0,
-      update: function() {},
-      active: function() {},
-      inactive: function() {}
+      update: function () {
+      },
+      active: function () {
+      },
+      inactive: function () {
+      }
     };
 
     spyOn(options, 'active');
