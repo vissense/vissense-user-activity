@@ -31,9 +31,9 @@ module.exports = function (grunt) {
           stripBanners: true
         },
         src: [
-          'lib/vissense.user-activity.js'
+          'lib/<%= pkg.name %>.js'
         ],
-        dest: '<%= dirs.tmp %>/vissense.user-activity.js'
+        dest: '<%= dirs.tmp %>/<%= pkg.name %>.js'
       }
     },
     umd: {
@@ -59,7 +59,7 @@ module.exports = function (grunt) {
           mangle: false
         },
         src: '<%= concat.tmp.dest %>',
-        dest: '<%= dirs.dist %>/vissense.user-activity.js'
+        dest: '<%= dirs.dist %>/<%= pkg.name %>.js'
       },
       dist: {
         options: {
@@ -70,7 +70,7 @@ module.exports = function (grunt) {
           }
         },
         src: '<%= concat.tmp.dest %>',
-        dest: '<%= dirs.dist %>/vissense.user-activity.min.js'
+        dest: '<%= dirs.dist %>/<%= pkg.name %>.min.js'
       }
     },
     jshint: {
@@ -91,7 +91,7 @@ module.exports = function (grunt) {
     jasmine: {
       coverage: {
         src: [
-          'lib/vissense.user-activity.js'
+          'lib/<%= pkg.name %>.js'
         ],
         options: {
           display: 'full',

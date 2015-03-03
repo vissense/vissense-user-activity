@@ -15,7 +15,7 @@ module.exports = function (config) {
 
       'bower_components/vissense/dist/vissense.min.js',
 
-      'lib/vissense.user-activity.js',
+      'lib/vissense-user-activity.js',
 
       'spec/**/*.js',
       // fixtures
@@ -49,7 +49,7 @@ module.exports = function (config) {
     },
 
     preprocessors: {
-      'lib/vissense.user-activity.js': ['coverage']
+      'lib/vissense-user-activity.js': ['coverage']
     },
 
     coverageReporter: {
