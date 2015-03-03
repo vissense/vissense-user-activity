@@ -81,7 +81,6 @@ describe('VisSense.UserActivity', function () {
     spyOn(options, 'inactive');
     spyOn(options, 'update');
 
-
     var activityHelper = VisSense.UserActivity(options).start();
 
     expect(activityHelper.isActive()).toBe(true);
@@ -92,9 +91,65 @@ describe('VisSense.UserActivity', function () {
     jasmine.clock().tick(1001);
 
     expect(activityHelper.isActive()).toBe(false);
-
     expect(options.update.calls.count()).toEqual(2);
     expect(options.active.calls.count()).toEqual(1);
+    expect(options.inactive.calls.count()).toEqual(1);
+
+    activityHelper.stop();
+  });
+
+
+  it('should verify that active/inactive are only called when state changes', function () {
+    var options = {
+      inactiveAfter: 1000,
+      debounce: 0,
+      update: function() {},
+      active: function() {},
+      inactive: function() {}
+    };
+
+    spyOn(options, 'active');
+    spyOn(options, 'inactive');
+    spyOn(options, 'update');
+
+    var activityHelper = VisSense.UserActivity(options).start();
+
+    expect(activityHelper.isActive()).toBe(true);
+    expect(options.update.calls.count()).toEqual(1);
+    expect(options.active.calls.count()).toEqual(1);
+    expect(options.inactive.calls.count()).toEqual(0);
+
+    jasmine.clock().tick(1);
+
+    fireScrollEvent();
+
+    jasmine.clock().tick(1);
+
+    expect(activityHelper.isActive()).toBe(true);
+    expect(options.update.calls.count()).toEqual(2);
+    expect(options.active.calls.count()).toEqual(1);
+    expect(options.inactive.calls.count()).toEqual(0);
+
+    jasmine.clock().tick(1001);
+
+    expect(activityHelper.isActive()).toBe(false);
+    expect(options.update.calls.count()).toEqual(3);
+    expect(options.active.calls.count()).toEqual(1);
+    expect(options.inactive.calls.count()).toEqual(1);
+
+    jasmine.clock().tick(999999);
+    expect(options.update.calls.count()).toEqual(3);
+    expect(options.inactive.calls.count()).toEqual(1);
+
+    jasmine.clock().tick(1);
+
+    fireScrollEvent();
+
+    jasmine.clock().tick(1);
+
+    expect(activityHelper.isActive()).toBe(true);
+    expect(options.update.calls.count()).toEqual(4);
+    expect(options.active.calls.count()).toEqual(2);
     expect(options.inactive.calls.count()).toEqual(1);
 
     activityHelper.stop();
@@ -113,8 +168,6 @@ describe('VisSense.UserActivity', function () {
     expect(activityHelper.isActive()).toBe(false);
 
     fireScrollEvent();
-
-    // let time elapse since user events are debounced
     jasmine.clock().tick(1);
 
     expect(activityHelper.isActive()).toBe(true);
@@ -154,9 +207,7 @@ describe('VisSense.UserActivity', function () {
     expect(activityHelper.isActive()).toBe(false);
 
     fireScrollEvent();
-    console.log('----------------- after firing event');
     jasmine.clock().tick(1);
-    console.log('----------------- after tick');
 
     expect(activityHelper.isActive()).toBe(true);
 

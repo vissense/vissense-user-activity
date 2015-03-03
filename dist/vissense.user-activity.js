@@ -19,17 +19,19 @@
             update: noop
         }), this._config.inactiveAfter -= 1, this._listeners = [], this._clearTimeout = noop, 
         this._state = {
-            active: !0,
+            changed: !0,
+            active: !1,
             lastActivityTime: now(),
             started: !1
         };
         var me = this;
         this._updateState = function() {
-            var lastActivityTime = me.getTimeSinceLastActivity();
+            var formerActive = me._state.active, lastActivityTime = me.getTimeSinceLastActivity();
             VisibilityApi.isHidden() || lastActivityTime >= me._config.inactiveAfter ? me._state.active = !1 : (me._state.active = !0, 
             me._clearTimeout(), me._clearTimeout = defer(function() {
                 me._updateState();
-            }, me._config.inactiveAfter)), fireListeners(me._listeners, me);
+            }, me._config.inactiveAfter)), me._state.changed = formerActive !== me._state.active, 
+            fireListeners(me._listeners, me);
         }, this._onUserActivity = function() {
             me._state.lastActivityTime = now(), me._updateState();
         }, this.onUpdate(this._config.update), this.onActive(this._config.active), this.onInactive(this._config.inactive);
@@ -61,15 +63,17 @@
         return function() {
             return remove(me._listeners, listener);
         };
+    }, UserActivity.prototype.onChange = function(callback) {
+        return this.onUpdate(function(self) {
+            self._state.changed && callback(self);
+        });
     }, UserActivity.prototype.onActive = function(callback) {
-        var me = this;
-        return this.onUpdate(function() {
-            me._state.active && callback(me);
+        return this.onChange(function(self) {
+            self._state.active && callback(self);
         });
     }, UserActivity.prototype.onInactive = function(callback) {
-        var me = this;
-        return this.onUpdate(function() {
-            me._state.active || callback(me);
+        return this.onChange(function(self) {
+            self._state.active || callback(self);
         });
     }, UserActivity.prototype.isActive = function() {
         return !this._state.started || this._state.active;
@@ -88,12 +92,12 @@
             return hooks.push(self.visibilityHook), function() {
                 remove(hooks, self.visibilityHook);
             };
-        }(this), this.removeOnUpdateListener = this._userActivity.onUpdate(function() {
+        }(this), this.removeOnChangeListener = this._userActivity.onChange(function() {
             monitor.update();
         });
     }, Strategy.UserActivityStrategy.prototype.start = function() {
         this._userActivity.start();
     }, Strategy.UserActivityStrategy.prototype.stop = function() {
-        this.removeVisibilityHook(), this.removeOnUpdateListener(), this._userActivity.stop();
+        this.removeVisibilityHook(), this.removeOnChangeListener(), this._userActivity.stop();
     };
 });
