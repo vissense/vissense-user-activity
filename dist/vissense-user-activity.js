@@ -17,7 +17,8 @@
             active: noop,
             inactive: noop,
             update: noop
-        }), this._listeners = [], this._clearTimeout = noop, this._state = {
+        }), this._config.throttle = this._config.debounce, this._listeners = [], this._cancelUpdate = noop, 
+        this._state = {
             changed: !0,
             active: !1,
             lastActivityTime: now(),
@@ -27,7 +28,7 @@
         this._updateState = function() {
             var formerActive = me._state.active, lastActivityTime = me.getTimeSinceLastActivity();
             VisibilityApi.isHidden() || lastActivityTime >= me._config.inactiveAfter ? me._state.active = !1 : (me._state.active = !0, 
-            me._clearTimeout(), me._clearTimeout = defer(function() {
+            me._cancelUpdate(), me._cancelUpdate = defer(function() {
                 me._updateState();
             }, me._config.inactiveAfter)), me._state.changed = formerActive !== me._state.active, 
             fireListeners(me._listeners, me);
@@ -35,13 +36,13 @@
             me._state.lastActivityTime = now(), me._updateState();
         }, this.onUpdate(this._config.update), this.onActive(this._config.active), this.onInactive(this._config.inactive);
     }
-    var Utils = VisSense.Utils, VisibilityApi = Utils.VisibilityApi, debounce = Utils.debounce, defer = Utils.defer, defaults = Utils.defaults, forEach = Utils.forEach, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
+    var Utils = VisSense.Utils, VisibilityApi = Utils.VisibilityApi, throttle = Utils.throttle, defer = Utils.defer, defaults = Utils.defaults, forEach = Utils.forEach, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
         var index = array.indexOf(element);
         return index > -1 ? (array.splice(index, 1), !0) : !1;
     };
     UserActivity.prototype.start = function() {
         return this._state.started ? this : (this._removeEventListeners = function(consumer, options) {
-            var onUserActivity = debounce(consumer, options.debounce), removeOnVisibilityChange = VisibilityApi.onVisibilityChange(onUserActivity), events = options.events;
+            var onUserActivity = throttle(consumer, options.throttle), removeOnVisibilityChange = VisibilityApi.onVisibilityChange(onUserActivity), events = options.events;
             return forEach(events, function(event) {
                 addEventListener(event, onUserActivity, !1);
             }), function() {
@@ -52,7 +53,7 @@
         }(this._onUserActivity, this._config), this._state.started = !0, this._onUserActivity(), 
         this);
     }, UserActivity.prototype.stop = function() {
-        return this._state.started ? (this._removeEventListeners(), this._clearTimeout(), 
+        return this._state.started ? (this._removeEventListeners(), this._cancelUpdate(), 
         this._state.started = !1, this) : this;
     }, UserActivity.prototype.onUpdate = function(callback) {
         if (!isFunction(callback)) return noop;
