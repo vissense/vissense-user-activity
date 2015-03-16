@@ -1,10 +1,10 @@
 {
   "name": "vissense-user-activity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "main": "dist/vissense-user-activity.min.js",
   "description": "A VisSense.js plugin for testing user activity.",
-  "keywords": ["vissense", "plugin"],
+  "keywords": ["vissense", "plugin",  "user", "activity", "idle"],
   "homepage": "https://www.github.com/vissense/vissense-user-activity",
   "authors": [
     "tbk"
@@ -34,6 +34,6 @@
     "jasmine-jquery": "velesin/jasmine-jquery#2.1.0"
   },
   "dependencies": {
-    "vissense": "vissense/vissense#master"
+    "vissense": "vissense/vissense#0.6.0"
   }
 }
