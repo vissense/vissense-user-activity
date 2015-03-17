@@ -5,6 +5,11 @@ See [Keep A Changelog](https://github.com/olivierlacan/keep-a-changelog)
 before changing this file!
 
 ## [Unreleased][unreleased]
+## [0.2.1] - 2015-03-17
+### Changed
+- update to VisSense v0.6.1
+
+## [0.2.0] - 2015-03-16
 ### Changed
 - use `Utils.throttle` instead of `Utils.debounce`
 
@@ -14,4 +19,7 @@ before changing this file!
 ## [0.1.0] - 2015-03-03
 ### Initial Release
 
-[unreleased]: https://github.com/vissense/vissense/compare/0.1.0...HEAD
+[unreleased]: https://github.com/vissense/vissense/compare/0.2.1...HEAD
+[0.2.1]: https://github.com/vissense/vissense/compare/0.2.0...0.2.1
+[0.2.0]: https://github.com/vissense/vissense/compare/0.1.0...0.2.0
+[0.1.0]: https://github.com/vissense/vissense/compare/b8fd75e...0.1.0
