@@ -16,17 +16,18 @@
             events: [ "resize", "scroll", "mousemove", "mousewheel", "keydown", "mousedown", "touchstart", "touchmove" ],
             active: noop,
             inactive: noop,
-            update: noop
+            update: noop,
+            referenceWindow: window
         }), this._listeners = [], this._cancelUpdate = noop, this._state = {
             changed: !0,
             active: !1,
             lastActivityTime: now(),
             started: !1
-        };
+        }, this._visibilityApi = Utils.createVisibilityApi(this._config.referenceWindow);
         var me = this;
         this._updateState = function() {
             var formerActive = me._state.active, lastActivityTime = me.getTimeSinceLastActivity();
-            VisibilityApi.isHidden() || lastActivityTime >= me._config.inactiveAfter ? me._state.active = !1 : (me._state.active = !0, 
+            me._visibilityApi.isHidden() || lastActivityTime >= me._config.inactiveAfter ? me._state.active = !1 : (me._state.active = !0, 
             me._cancelUpdate(), me._cancelUpdate = defer(function() {
                 me._updateState();
             }, me._config.inactiveAfter)), me._state.changed = formerActive !== me._state.active, 
@@ -35,22 +36,22 @@
             me._state.lastActivityTime = now(), me._updateState();
         }, this.onUpdate(this._config.update), this.onActive(this._config.active), this.onInactive(this._config.inactive);
     }
-    var Utils = VisSense.Utils, VisibilityApi = Utils.VisibilityApi, throttle = Utils.throttle, defer = Utils.defer, defaults = Utils.defaults, forEach = Utils.forEach, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
+    var Utils = VisSense.Utils, throttle = Utils.throttle, defer = Utils.defer, defaults = Utils.defaults, forEach = Utils.forEach, isFunction = Utils.isFunction, noop = Utils.noop, now = Utils.now, Strategy = VisSense.VisMon.Strategy, remove = function(array, element) {
         var index = array.indexOf(element);
         return index > -1 ? (array.splice(index, 1), !0) : !1;
     };
     UserActivity.prototype.start = function() {
-        return this._state.started ? this : (this._removeEventListeners = function(consumer, options) {
-            var onUserActivity = throttle(consumer, options.throttle), removeOnVisibilityChange = VisibilityApi.onVisibilityChange(onUserActivity), events = options.events;
+        return this._state.started ? this : (this._removeEventListeners = function(VisibilityApi, consumer, options) {
+            var win = options.referenceWindow, onUserActivity = throttle(consumer, options.throttle), removeOnVisibilityChange = VisibilityApi.onVisibilityChange(onUserActivity), events = options.events;
             return forEach(events, function(event) {
-                addEventListener(event, onUserActivity, !1);
+                win.addEventListener(event, onUserActivity, !1);
             }), function() {
                 forEach(events, function(event) {
-                    removeEventListener(event, onUserActivity, !1);
+                    win.removeEventListener(event, onUserActivity, !1);
                 }), removeOnVisibilityChange();
             };
-        }(this._onUserActivity, this._config), this._state.started = !0, this._onUserActivity(), 
-        this);
+        }(this._visibilityApi, this._onUserActivity, this._config), this._state.started = !0, 
+        this._onUserActivity(), this);
     }, UserActivity.prototype.stop = function() {
         return this._state.started ? (this._removeEventListeners(), this._cancelUpdate(), 
         this._state.started = !1, this) : this;
@@ -81,22 +82,22 @@
     }, VisSense.UserActivity = UserActivity, Strategy.UserActivityStrategy = function(config) {
         this._userActivity = new UserActivity(config);
         var me = this;
-        this.visibilityHook = function() {
+        this._visibilityHook = function() {
             return me._userActivity.isActive();
         };
     }, Strategy.UserActivityStrategy.prototype = Object.create(Strategy.prototype), 
     Strategy.UserActivityStrategy.prototype.init = function(monitor) {
-        this.removeVisibilityHook = function(self) {
+        this._removeVisibilityHook = function(self) {
             var hooks = monitor.visobj()._config.visibilityHooks;
-            return hooks.push(self.visibilityHook), function() {
-                remove(hooks, self.visibilityHook);
+            return hooks.push(self._visibilityHook), function() {
+                remove(hooks, self._visibilityHook);
             };
-        }(this), this.removeOnChangeListener = this._userActivity.onChange(function() {
+        }(this), this._removeOnChangeListener = this._userActivity.onChange(function() {
             monitor.update();
         });
     }, Strategy.UserActivityStrategy.prototype.start = function() {
         this._userActivity.start();
     }, Strategy.UserActivityStrategy.prototype.stop = function() {
-        this.removeVisibilityHook(), this.removeOnChangeListener(), this._userActivity.stop();
+        this._removeVisibilityHook(), this._removeOnChangeListener(), this._userActivity.stop();
     };
 });
