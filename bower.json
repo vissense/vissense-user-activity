@@ -1,6 +1,6 @@
 {
   "name": "vissense-user-activity",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "license": "MIT",
   "main": "dist/vissense-user-activity.min.js",
   "description": "A VisSense.js plugin for testing user activity.",
