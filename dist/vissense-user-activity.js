@@ -12,13 +12,12 @@
         if (!(this instanceof UserActivity)) return new UserActivity(config);
         this._config = defaults(config, {
             inactiveAfter: 6e4,
-            debounce: 100,
+            throttle: 100,
             events: [ "resize", "scroll", "mousemove", "mousewheel", "keydown", "mousedown", "touchstart", "touchmove" ],
             active: noop,
             inactive: noop,
             update: noop
-        }), this._config.throttle = this._config.debounce, this._listeners = [], this._cancelUpdate = noop, 
-        this._state = {
+        }), this._listeners = [], this._cancelUpdate = noop, this._state = {
             changed: !0,
             active: !1,
             lastActivityTime: now(),
